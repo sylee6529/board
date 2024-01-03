@@ -1,0 +1,38 @@
+spring:
+  profiles:
+    active: profile
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: test
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+jc:
+  server:
+    name: rod-server
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+jc:
+  server:
+    name: dev-server
