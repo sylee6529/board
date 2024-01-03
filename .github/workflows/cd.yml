@@ -56,8 +56,7 @@ jobs:
         key: ${{ secrets.KEY }}
         envs: GITHUB_SHA
         script: |
-          sudo docker rm -f $(docker ps -qa)
           sudo docker pull ${{ secrets.DOCKER_REPO }}/jungle-coders-backend
-          echo "Current directory: $(pwd)"
-          docker-compose up -d
-          docker image prune -f
+          sudo docker stop $(sudo docker ps -q) 2>/dev/null || true
+          sudo docker run --name github-actions-demo --rm -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/jungle-coders-backend
+          sudo docker system prune -f
