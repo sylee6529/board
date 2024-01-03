@@ -8,6 +8,9 @@ spring:
   config:
     activate:
       on-profile: local
+jc:
+  server:
+    name: local
 
 ---
 
@@ -15,6 +18,10 @@ spring:
   config:
     activate:
       on-profile: test
+jc:
+  server:
+    name: test
+
 
 ---
 
@@ -25,7 +32,7 @@ spring:
 
 jc:
   server:
-    name: rod-server
+    name: prod-server
 
 ---
 
