@@ -32,9 +32,8 @@ jobs:
       shell: bash
     - name: Make application.yml
       run: |
-         cd ./src/main/resources
-         touch ./application.yml
-         echo "${{ secrets.PROPERTIES }}" > ./application.yml
+         mkdir -p ./src/main/resources
+         echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.yml
       shell: bash	 
     - name: Gradle Build 수행
       uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
