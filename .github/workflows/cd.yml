@@ -26,9 +26,8 @@ jobs:
     # Github secrets로부터 데이터를 받아서, 워크 플로우에 파일을 생성
     - name: Make application.yml
       run: |
-        cd ./src/main/resources
-        touch ./application.yml
-        echo "${{ secrets.PROPERTIES }}" > ./application.yml
+         mkdir -p ./src/main/resources
+         echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.yml
       shell: bash	 
      
     # gradle을 통해 소스를 빌드
