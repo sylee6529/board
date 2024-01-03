@@ -58,5 +58,6 @@ jobs:
         script: |
           sudo docker rm -f $(docker ps -qa)
           sudo docker pull ${{ secrets.DOCKER_REPO }}/jungle-coders-backend
+          echo "Current directory: $(pwd)"
           docker-compose up -d
           docker image prune -f
