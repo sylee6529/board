@@ -27,7 +27,7 @@ jobs:
     - name: Make application.yml
       run: |
          mkdir -p ./src/main/resources
-         echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.yml
+         cat "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.yml
       shell: bash	 
      
     # gradle을 통해 소스를 빌드
