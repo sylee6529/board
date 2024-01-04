@@ -23,6 +23,15 @@ jobs:
           java-version: '17'
           distribution: "adopt"
 
+      ## create application-prod.properties
+      - name: create application.yml
+        if: contains(github.ref, 'main')
+        run: |
+          cd ./src/main/resources
+          touch ./application.yml
+          echo "${{ secrets.PROPERTIES_PROD }}" > ./application.yml
+        shell: bash
+
       # gradle을 통해 소스를 빌드
       - name: Build with Gradle
         run: |
