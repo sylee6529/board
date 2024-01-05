@@ -49,6 +49,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v3
       - name: deploy
         uses: appleboy/ssh-action@master
         id: deploy
@@ -60,5 +61,6 @@ jobs:
           script: |
             sudo docker rm -f $(docker ps -qa)
             sudo docker pull ${{ secrets.DOCKER_REPO }}/jungle-coders-backend
+            pwd
             docker-compose up -d
             docker image prune -f
