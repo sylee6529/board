@@ -29,9 +29,9 @@ jobs:
 
       # gradle을 통해 소스를 빌드
       - name: Build with Gradle
-      - uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-        with:
-          arguments: build
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean build -x test
 
       # dockerfile을 통해 이미지를 빌드하고, 이를 docker repo로 push
       # 이 때 사용되는 ${{ secrets.DOCKER_REPO }}/jungle-coders-backend 가 위에서 만든 도커 repository
