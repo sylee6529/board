@@ -12,6 +12,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest # ubuntu 최신 버전에서 script를 실행
+    defaults:
+      run:
+        working-directory: /deploy
+
     steps:
       # 지정한 저장소(현재 REPO)에서 코드를 워크플로우 환경으로 가져오도록 하는 github action
       - uses: actions/checkout@v3
@@ -26,6 +30,8 @@ jobs:
       - run: touch ./src/main/resources/application.yml
       - run: echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.yml
       - run: cat ./src/main/resources/application.yml
+      - run: pwd
+      - run: ls
 
       # gradle을 통해 소스를 빌드
       - name: Build with Gradle
@@ -47,6 +53,9 @@ jobs:
   run-docker-image-on-ec2:
     needs: build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: /deploy
 
     steps:
       - uses: actions/checkout@v3
