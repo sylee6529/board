@@ -1,77 +1,75 @@
-name: CD with Gradle
+# github repository Actions 페이지에 나타낼 이름
+name: CD
 
-#  main 브랜치에 코드가 push 되었을 때 실행
+# event trigger
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
 
-# 코드의 내용을 이 파일을 실행하여 action을 수행하는 주체(Github Actions에서 사용하는 VM)가 읽을 수 있도록 허용
 permissions:
   contents: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest # ubuntu 최신 버전에서 script를 실행
-    defaults:
-      run:
-        working-directory: /deploy
-
+  CI-CD:
+    runs-on: ubuntu-latest
     steps:
-      # 지정한 저장소(현재 REPO)에서 코드를 워크플로우 환경으로 가져오도록 하는 github action
+
+      ## jdk setting
       - uses: actions/checkout@v3
-      # open jdk 17 버전 환경을 세팅
+          # open jdk 17 버전 환경을 세팅
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: "adopt"
 
-      - uses: actions/checkout@v3
-      - run: pwd
-      - run: ls
-      - run: touch ./src/main/resources/application.yml
-      - run: echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.yml
-      - run: cat ./src/main/resources/application.yml
+      ## gradle caching
+      - name: Gradle Caching
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
+      ## create application-prod.properties
+      - name: make application.yml
+        if: contains(github.ref, 'main')
+        run: |
+          cd ./src/main/resources
+          touch ./application.yml
+          echo "${{ secrets.PROPERTIES }}" > ./application.yml
+        shell: bash
 
-      # gradle을 통해 소스를 빌드
+      ## gradle build
       - name: Build with Gradle
         run: |
           chmod +x ./gradlew
           ./gradlew clean build -x test
 
-      # dockerfile을 통해 이미지를 빌드하고, 이를 docker repo로 push
-      # 이 때 사용되는 ${{ secrets.DOCKER_REPO }}/jungle-coders-backend 가 위에서 만든 도커 repository
-      - name: Docker build & push to docker repo
+      ## docker build & push to production
+      - name: Docker build & push to prod
+        if: contains(github.ref, 'main')
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }}/jungle-coders-backend .
           docker push ${{ secrets.DOCKER_REPO }}/jungle-coders-backend
 
-    # appleboy/ssh-action@master 액션을 사용하여 지정한 서버에 ssh로 접속하고, script를 실행
-    # script의 내용은 도커의 기존 프로세스들을 제거하고, docker repo로부터 방금 위에서 push한 내용을 pull 받아 실행하는 것
-    # 실행 시, docker-compose를 사용
-  run-docker-image-on-ec2:
-    needs: build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: /deploy
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: deploy
+      ## deploy to production
+      - name: Deploy to prod
         uses: appleboy/ssh-action@master
-        id: deploy
+        id: deploy-prod
+        if: contains(github.ref, 'main')
         with:
-          host: ${{ secrets.HOST }}
-          username: ubuntu
+          host: ${{ secrets.HOST}}
+          username: ec2-user
           key: ${{ secrets.KEY }}
           envs: GITHUB_SHA
           script: |
             sudo docker rm -f $(docker ps -qa)
             sudo docker pull ${{ secrets.DOCKER_REPO }}/jungle-coders-backend
-            pwd
-            ls
             docker-compose up -d
             docker image prune -f
