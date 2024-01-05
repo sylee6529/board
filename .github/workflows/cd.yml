@@ -27,11 +27,12 @@ jobs:
           distribution: "adopt"
 
       - uses: actions/checkout@v3
+      - run: pwd
+      - run: ls
       - run: touch ./src/main/resources/application.yml
       - run: echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.yml
       - run: cat ./src/main/resources/application.yml
-      - run: pwd
-      - run: ls
+
 
       # gradle을 통해 소스를 빌드
       - name: Build with Gradle
