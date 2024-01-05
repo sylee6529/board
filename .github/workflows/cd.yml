@@ -46,7 +46,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }} # EC2 인스턴스 퍼블릭 DNS
           username: ubuntu
-          key: ${{ secrets.EY }} # pem 키
+          key: ${{ secrets.KEY }} # pem 키
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}/jungle-coders-backend
             docker stop $(docker ps -a -q)
