@@ -62,5 +62,6 @@ jobs:
             sudo docker rm -f $(docker ps -qa)
             sudo docker pull ${{ secrets.DOCKER_REPO }}/jungle-coders-backend
             pwd
+            ls
             docker-compose up -d
             docker image prune -f
