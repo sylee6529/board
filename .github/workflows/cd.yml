@@ -1,75 +1,55 @@
-# github repository Actions 페이지에 나타낼 이름
-name: CD
+name: Java CD with Gradle
 
-# event trigger
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" , "dev" ]
 
 permissions:
   contents: read
 
 jobs:
-  CI-CD:
-    runs-on: ubuntu-latest
-    steps:
+  build:
 
-      ## jdk setting
+    runs-on: ubuntu-latest
+
+    steps:
       - uses: actions/checkout@v3
-          # open jdk 17 버전 환경을 세팅
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: "adopt"
+          distribution: 'temurin'
 
-      ## gradle caching
-      - name: Gradle Caching
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
 
-      ## create application-prod.properties
       - name: make application.yml
-        if: contains(github.ref, 'main')
         run: |
           cd ./src/main/resources
           touch ./application.yml
           echo "${{ secrets.PROPERTIES }}" > ./application.yml
-        shell: bash
 
-      ## gradle build
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
       - name: Build with Gradle
-        run: |
-          chmod +x ./gradlew
-          ./gradlew clean build -x test
+        run: ./gradlew build -x test
 
-      ## docker build & push to production
-      - name: Docker build & push to prod
-        if: contains(github.ref, 'main')
+      - name: Docker build
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }}/jungle-coders-backend .
-          docker push ${{ secrets.DOCKER_REPO }}/jungle-coders-backend
+          docker build -t app .
+          docker tag app ${{ secrets.DOCKER_USERNAME }}/jungle-coders-backend
+          docker push ${{ secrets.DOCKER_USERNAME }}/jungle-coders-backend
 
-      ## deploy to production
-      - name: Deploy to prod
+      - name: Deploy
         uses: appleboy/ssh-action@master
-        id: deploy-prod
-        if: contains(github.ref, 'main')
         with:
-          host: ${{ secrets.HOST}}
+          host: ${{ secrets.HOST }} # EC2 인스턴스 퍼블릭 DNS
           username: ubuntu
-          key: ${{ secrets.KEY }}
-          envs: GITHUB_SHA
+          key: ${{ secrets.EY }} # pem 키
           script: |
-            sudo docker rm -f $(docker ps -qa)
-            sudo docker pull ${{ secrets.DOCKER_REPO }}/jungle-coders-backend
-            docker-compose up -d
-            docker image prune -f
+            docker pull ${{ secrets.DOCKER_USERNAME }}/jungle-coders-backend
+            docker stop $(docker ps -a -q)
+            docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/jungle-coders-backend
+            docker rm $(docker ps --filter 'status=exited' -a -q)
+            docker image prune -a -f
