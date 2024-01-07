@@ -1,4 +1,4 @@
-package com.jungle.jungleboard;
+package com.jungle.board;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
