@@ -2,67 +2,77 @@ package com.jungle.board.user.controller;
 
 import com.jungle.board.common.CommonResponse;
 import com.jungle.board.user.domain.dto.request.LogInUserRequest;
-import com.jungle.board.util.TokenProvider;
+import com.jungle.board.user.domain.dto.response.CreateUserResponse;
+import com.jungle.board.user.domain.dto.response.LoginUserResponse;
+import com.jungle.board.user.domain.dto.response.RefreshTokenReponse;
+import com.jungle.board.user.exception.UserException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.jungle.board.user.domain.User;
-import com.jungle.board.user.domain.dto.UserDto;
 import com.jungle.board.user.domain.dto.request.CreateUserRequest;
 import com.jungle.board.user.service.UserService;
 
 @Slf4j
 @RestController
-@RequestMapping("/auth")
+@AllArgsConstructor
+@RequestMapping("api/user")
 public class UserController {
 
     private UserService userService;
-    private TokenProvider tokenProvider;
-
-    public UserController(UserService userService, TokenProvider tokenProvider) {
-        this.userService = userService;
-        this.tokenProvider = tokenProvider;
-    }
 
     @PostMapping("/signup")
     public ResponseEntity<?> register(@RequestBody CreateUserRequest createUserRequest) {
         try {
-            if(createUserRequest == null || createUserRequest.getNickname() == null || createUserRequest.getEmail() == null) {
-                throw new RuntimeException("Invalid arguments");
-            }
-            User user = userService.create(createUserRequest.toEntity(createUserRequest));
-            return ResponseEntity.ok(user);
+            userService.create(createUserRequest);
+            log.info("User registered successfully");
+            return ResponseEntity.ok(CreateUserResponse.builder()
+                    .message(UserException.REGISTER_SUCCESS.getMessage())
+                    .build());
         } catch (Exception e) {
-            log.error("Failed to register com.jungle.jungleboard.user", e);
-            CommonResponse commonResponse = CommonResponse.builder()
-                    .code("400")
-                    .message("Failed to register com.jungle.jungleboard.user")
-                    .build();
-            return ResponseEntity.badRequest().body(commonResponse);
+            return ResponseEntity.badRequest().body(CommonResponse.builder()
+                    .code(UserException.REGISTER_FAIL.getCode())
+                    .message(UserException.REGISTER_FAIL.getMessage())
+                    .build());
         }
     }
 
     @PostMapping("/signin")
     public ResponseEntity<?> login(@RequestBody LogInUserRequest logInUserRequest) {
-        User user = userService.getByCredentials(logInUserRequest.getUserId(), logInUserRequest.getPassword());
-        if (user != null) {
-            final String token = tokenProvider.create(user);
-            final UserDto responseUserDto = UserDto.builder()
-                    .id(user.getId().toString())
-                    .userId(user.getUserId())
-                    .password(user.getPassword())
-                    .token(token)
-                    .build();
-            return ResponseEntity.ok(responseUserDto);
+        try {
+            LoginUserResponse loginUserResponse = userService.authenticate(logInUserRequest);
+            if (loginUserResponse != null) {
+                return ResponseEntity.ok(loginUserResponse);
+            } else {
+                return ResponseEntity.badRequest().body(CommonResponse.builder()
+                        .code(UserException.LOGIN_FAIL.getCode())
+                        .message(UserException.LOGIN_FAIL.getMessage())
+                        .build());
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(CommonResponse.builder()
+                    .code(UserException.LOGIN_FAIL.getCode())
+                    .message(UserException.LOGIN_FAIL.getMessage())
+                    .build());
+        }
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+        RefreshTokenReponse refreshTokenResponse = userService.refreshToken(request);
+        if(refreshTokenResponse != null) {
+            return ResponseEntity.ok(refreshTokenResponse);
         } else {
-            CommonResponse commonResponse = CommonResponse.builder()
-                    .code("400")
-                    .message("Failed to login")
-                    .build();
-            return ResponseEntity.badRequest().body(commonResponse);
+            return ResponseEntity.badRequest().body(CommonResponse.builder()
+                    .code(HttpStatus.UNAUTHORIZED.toString())
+                    .message(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                    .build());
         }
     }
 }
