@@ -18,7 +18,6 @@ public class GetPostDto {
     private String content;
     private int viewCount;
     private Long userId;
-    private List<GetCommentDto> comments;
 
     public static GetPostDto from(Post post) {
         return new GetPostDto(
@@ -26,10 +25,7 @@ public class GetPostDto {
                 post.getTitle(),
                 post.getContent(),
                 post.getViewCount(),
-                post.getUser().getId(),
-                post.getComments().stream()
-                        .map(GetCommentDto::from)
-                        .toList()
+                post.getUser().getId()
         );
     }
 }
