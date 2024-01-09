@@ -2,6 +2,7 @@ package com.jungle.board.post.controller;
 
 import com.jungle.board.common.CommonResponse;
 import com.jungle.board.post.domain.dto.CreatePostRequest;
+import com.jungle.board.post.domain.dto.GetPostResponse;
 import com.jungle.board.post.service.PostService;
 import com.jungle.board.user.domain.User;
 import lombok.AllArgsConstructor;
@@ -27,5 +28,12 @@ public class PostController {
                     .message("게시물 생성에 실패했습니다.")
                     .build());
         }
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getPostById(@PathVariable Long id) {
+        GetPostResponse getPostResponse = postService.getPostById(id);
+        return ResponseEntity.ok(getPostResponse);
     }
 }

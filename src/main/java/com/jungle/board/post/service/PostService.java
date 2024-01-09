@@ -4,6 +4,7 @@ import com.jungle.board.board.domain.Board;
 import com.jungle.board.board.repository.BoardRepository;
 import com.jungle.board.post.domain.Post;
 import com.jungle.board.post.domain.dto.CreatePostRequest;
+import com.jungle.board.post.domain.dto.GetPostResponse;
 import com.jungle.board.post.repository.PostRepository;
 import com.jungle.board.user.domain.User;
 import lombok.AllArgsConstructor;
@@ -30,5 +31,12 @@ public class PostService {
                 .viewCount(0)
                 .status("ACTIVE")
                 .build());
+    }
+
+    public GetPostResponse getPostById(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        return GetPostResponse.from(post);
     }
 }

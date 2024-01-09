@@ -1,4 +1,4 @@
-package com.jungle.board.board.domain.dto;
+package com.jungle.board.post.domain.dto;
 
 import com.jungle.board.comment.domain.Comment;
 import lombok.AllArgsConstructor;
