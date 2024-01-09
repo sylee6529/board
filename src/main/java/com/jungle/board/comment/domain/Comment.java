@@ -1,6 +1,7 @@
 package com.jungle.board.comment.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jungle.board.common.BaseTimeEntity;
 import com.jungle.board.post.domain.Post;
 import com.jungle.board.user.domain.User;
 import jakarta.persistence.*;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class Comment {
+public class Comment  extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

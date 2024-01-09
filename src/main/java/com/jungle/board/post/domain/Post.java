@@ -2,6 +2,7 @@ package com.jungle.board.post.domain;
 
 import com.jungle.board.board.domain.Board;
 import com.jungle.board.comment.domain.Comment;
+import com.jungle.board.common.BaseTimeEntity;
 import com.jungle.board.user.domain.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -16,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class Post {
+public class Post extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -18,6 +20,8 @@ public class GetPostDto {
     private String content;
     private int viewCount;
     private Long userId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static GetPostDto from(Post post) {
         return new GetPostDto(
@@ -25,7 +29,9 @@ public class GetPostDto {
                 post.getTitle(),
                 post.getContent(),
                 post.getViewCount(),
-                post.getUser().getId()
+                post.getUser().getId(),
+                post.getCreatedAt(),
+                post.getUpdatedAt()
         );
     }
 }
