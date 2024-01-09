@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class CreatePostDto {
+public class CreatePostRequest {
     private String title;
     private String content;
     private Long boardId;

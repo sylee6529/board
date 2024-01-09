@@ -1,13 +1,12 @@
 package com.jungle.board.post.controller;
 
 import com.jungle.board.common.CommonResponse;
-import com.jungle.board.post.domain.dto.CreatePostDto;
+import com.jungle.board.post.domain.dto.CreatePostRequest;
 import com.jungle.board.post.service.PostService;
 import com.jungle.board.user.domain.User;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,9 +17,9 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping("")
-    public ResponseEntity<?> create(@AuthenticationPrincipal User user, @RequestBody CreatePostDto createPostDto) {
+    public ResponseEntity<?> create(@AuthenticationPrincipal User user, @RequestBody CreatePostRequest createPostRequest) {
         try {
-            postService.create(user, createPostDto);
+            postService.create(user, createPostRequest);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(CommonResponse.builder()
@@ -29,6 +28,4 @@ public class PostController {
                     .build());
         }
     }
-
-
 }

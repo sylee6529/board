@@ -3,7 +3,7 @@ package com.jungle.board.post.service;
 import com.jungle.board.board.domain.Board;
 import com.jungle.board.board.repository.BoardRepository;
 import com.jungle.board.post.domain.Post;
-import com.jungle.board.post.domain.dto.CreatePostDto;
+import com.jungle.board.post.domain.dto.CreatePostRequest;
 import com.jungle.board.post.repository.PostRepository;
 import com.jungle.board.user.domain.User;
 import lombok.AllArgsConstructor;
@@ -17,13 +17,13 @@ public class PostService {
     private final PostRepository postRepository;
     private final BoardRepository boardRepository;
 
-    public void create(final User user, final CreatePostDto createPostDto) {
-        final Board board = boardRepository.findById(createPostDto.getBoardId())
+    public void create(final User user, final CreatePostRequest createPostRequest) {
+        final Board board = boardRepository.findById(createPostRequest.getBoardId())
                 .orElseThrow(() -> new RuntimeException("Board not found"));
 
         postRepository.save(Post.builder()
-                .title(createPostDto.getTitle())
-                .content(createPostDto.getContent())
+                .title(createPostRequest.getTitle())
+                .content(createPostRequest.getContent())
                 .user(user)
                 .board(board)
                 .likeCount(0)
